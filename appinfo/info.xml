@@ -17,6 +17,10 @@
 		<nextcloud min-version="12" max-version="14"/>
 	</dependencies>
 
+	<commands>
+		<command>OCA\FilesNotifyRedis\Command\NotifyCommand</command>
+	</commands>
+
 	<category>files</category>
 	<website>https://github.com/icewind1991/files_notify_redis</website>
 	<bugs>https://github.com/icewind1991/files_notify_redis/issues</bugs>

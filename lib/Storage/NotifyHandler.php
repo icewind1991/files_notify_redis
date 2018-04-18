@@ -68,22 +68,23 @@ class NotifyHandler implements INotifyHandler {
 	}
 
 	private function decodeEvent($string) {
-		list($type, $path1, $path2) = explode('|', $string);
-		switch ($type) {
+		$parts = explode('|', $string);
+
+		switch ($parts[0]) {
 			case 'write':
-				return new Change(IChange::MODIFIED, $this->getRelativePath($path1));
+				return new Change(IChange::MODIFIED, $this->getRelativePath($parts[1]));
 			case 'remove':
-				return new Change(IChange::REMOVED, $this->getRelativePath($path1));
+				return new Change(IChange::REMOVED, $this->getRelativePath($parts[1]));
 			case 'rename':
-				return new RenameChange(IChange::RENAMED, $this->getRelativePath($path1), $this->getRelativePath($path2));
+				return new RenameChange(IChange::RENAMED, $this->getRelativePath($parts[1]), $this->getRelativePath($parts[2]));
 		}
-		throw new \Error('Invalid event type ' . $type);
+		throw new \Error('Invalid event type ' . $parts[0]);
 	}
 
 	public function listen(callable $callback) {
 		$active = true;
 
-		$stop = function() use (&$active) {
+		$stop = function () use (&$active) {
 			$active = false;
 		};
 

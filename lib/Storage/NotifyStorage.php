@@ -27,14 +27,9 @@ use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;
 
-class NotifyWrapper extends Local implements INotifyStorage {
-	/** @var RedisFactory */
-	private $redisFactory;
-
-	public function __construct($arguments) {
-		parent::__construct($arguments);
-
-		$this->redisFactory = \OC::$server->getGetRedisFactory();
+class NotifyStorage extends Local implements INotifyStorage {
+	protected function getRedis() {
+		return \OC::$server->getGetRedisFactory()->getInstance();
 	}
 
 	public function listen($path, callable $callback) {
@@ -48,6 +43,6 @@ class NotifyWrapper extends Local implements INotifyStorage {
 	}
 
 	public function notify($path) {
-		return new NotifyHandler($this->datadir, $this->redisFactory->getInstance());
+		return new NotifyHandler($this->getSourcePath($path), $this->getRedis());
 	}
 }

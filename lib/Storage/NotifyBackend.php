@@ -29,6 +29,6 @@ use OCP\IL10N;
 class NotifyBackend extends Local {
 	public function __construct(IL10N $l, NullMechanism $legacyAuth) {
 		parent::__construct($l, $legacyAuth);
-		$this->setStorageClass(NotifyWrapper::class);
+		$this->setStorageClass(NotifyStorage::class);
 	}
 }
