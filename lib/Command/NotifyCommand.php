@@ -30,6 +30,7 @@ use OCP\Files\Storage\INotifyStorage;
 use OCP\IConfig;
 use OCP\IUser;
 use OCP\IUserManager;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -51,14 +52,15 @@ class NotifyCommand extends Base {
 	protected function configure() {
 		$this
 			->setName('files_notify_redis:primary')
-			->setDescription('Listen for redis updated notifications for the primary local storage');
+			->setDescription('Listen for redis updated notifications for the primary local storage')
+			->addArgument('list', InputArgument::REQUIRED, 'redis list where the notifications are pushed');
 		parent::configure();
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
 		$redisFactory = \OC::$server->getGetRedisFactory();
-		$notifyHandler = new NotifyHandler($dataDirectory, $redisFactory->getInstance());
+		$notifyHandler = new NotifyHandler($dataDirectory, $redisFactory->getInstance(), $input->getArgument('list'));
 		$verbose = $input->getOption('verbose');
 
 		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {

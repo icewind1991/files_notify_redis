@@ -12,14 +12,14 @@ This app depends on a separate program to push filesystem notifications into red
 - `remame|$from|$to`
 - `remove|$path`
 
-To a list in redis with the name `notify`.
+To a list in redis.
 
 An example program to push the filesystem notifications into redis is [`notify-redis`](https://github.com/icewind1991/notify-redis)
 
 To process the notifications run the following `occ` command
 
 ```
-occ files_notify_redis:primary [-v]
+occ files_notify_redis:primary [-v] <list>
 ```
 
 ## Requirements

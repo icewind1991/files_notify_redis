@@ -33,13 +33,18 @@ class NotifyHandler implements INotifyHandler {
 	/** @var \Redis */
 	private $redis;
 
+	/** @var string */
+	private $list;
+
 	/**
 	 * @param string $basePath
 	 * @param \Redis $redis
+	 * @param string $list
 	 */
-	public function __construct($basePath, \Redis $redis) {
+	public function __construct($basePath, \Redis $redis, $list = 'notify') {
 		$this->basePath = rtrim($basePath, '/');
 		$this->redis = $redis;
+		$this->list = $list;
 	}
 
 	public function getChanges() {
@@ -51,7 +56,7 @@ class NotifyHandler implements INotifyHandler {
 	}
 
 	private function getChange() {
-		$event = $this->redis->rPop('notify');
+		$event = $this->redis->rPop($this->list);
 		return $event ? $this->decodeEvent($event) : false;
 	}
 
@@ -94,12 +99,15 @@ class NotifyHandler implements INotifyHandler {
 		}
 
 		while ($active) {
-			if (function_exists('pcntl_signal_dispatch')) {
-				pcntl_signal_dispatch();
-			}
 			$change = $this->getChange();
 			if (!$change) {
-				sleep(1);
+				// sleep while listening for stop signal
+				for ($i = 0; ($i < 10 && $active); $i++) {
+					if (function_exists('pcntl_signal_dispatch')) {
+						pcntl_signal_dispatch();
+					}
+					usleep(100 * 1000);
+				}
 			} else {
 				if ($callback($change) === false) {
 					$active = false;
