@@ -32,6 +32,7 @@ use OCP\IUser;
 use OCP\IUserManager;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyCommand extends Base {
@@ -53,34 +54,31 @@ class NotifyCommand extends Base {
 		$this
 			->setName('files_notify_redis:primary')
 			->setDescription('Listen for redis updated notifications for the primary local storage')
-			->addArgument('list', InputArgument::REQUIRED, 'redis list where the notifications are pushed');
+			->addArgument('list', InputArgument::REQUIRED, 'redis list where the notifications are pushed')
+			->addOption('prefix', 'p', InputOption::VALUE_REQUIRED, 'The prefix that is stripped from the path retrieved from redis, defaults to the Nextcloud data directory')
+			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'The format of the path retrieved from redis after the prefix is stripped', '/$user/files/$path');
 		parent::configure();
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
+		$prefix = $input->getOption('prefix') ?? $dataDirectory;
+		$format = $input->getOption('format');
 		$redisFactory = \OC::$server->getGetRedisFactory();
-		$notifyHandler = new NotifyHandler($dataDirectory, $redisFactory->getInstance(), $input->getArgument('list'));
+		$notifyHandler = new NotifyHandler($prefix, $redisFactory->getInstance(), $input->getArgument('list'), $format);
 		$verbose = $input->getOption('verbose');
 
 		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {
-			$path = $change->getPath();
-			if (substr_count($path, '/') < 2) {
-				return;
+			if ($verbose) {
+				$this->logUpdate($change, $output);
 			}
 
-			list($userId, $type, $subPath) = explode('/', $path, 3);
-			if ($type === 'files') {
-				if ($verbose) {
-					$this->logUpdate($change, $output);
-				}
-
-				$user = $this->userManager->get($userId);
-				if (!$user) {
-					$output->writeln("<error>Unknown user $userId</error>");
-				} else {
-					$this->handleUpdate($change, $user, $type . '/' . $subPath);
-				}
+			list ($userId, , $subPath) = explode('/', $change->getPath());
+			$user = $this->userManager->get($userId);
+			if (!$user) {
+				$output->writeln("<error>Unknown user $userId</error>");
+			} else {
+				$this->handleUpdate($change, $user, 'files/' . $subPath);
 			}
 		});
 	}

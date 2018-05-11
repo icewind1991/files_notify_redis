@@ -36,15 +36,24 @@ class NotifyHandler implements INotifyHandler {
 	/** @var string */
 	private $list;
 
+	/** @var string|false */
+	private $formatRegex;
+
 	/**
 	 * @param string $basePath
 	 * @param \Redis $redis
 	 * @param string $list
+	 * @param string $format
 	 */
-	public function __construct($basePath, \Redis $redis, $list = 'notify') {
+	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path') {
 		$this->basePath = rtrim($basePath, '/');
 		$this->redis = $redis;
 		$this->list = $list;
+		$this->formatRegex = '|' . str_replace(
+				['\$user', '\$path'],
+				['(?P<user>[^/]+)', '(?P<path>.*)'],
+				preg_quote(ltrim($format, '/'), '|')
+			) . '|';
 	}
 
 	public function getChanges() {
@@ -57,7 +66,16 @@ class NotifyHandler implements INotifyHandler {
 
 	private function getChange() {
 		$event = $this->redis->rPop($this->list);
-		return $event ? $this->decodeEvent($event) : false;
+		if ($event) {
+			$decodedEvent = $this->decodeEvent($event);
+			if ($decodedEvent->getPath() === null || ($decodedEvent instanceof RenameChange && $decodedEvent->getTargetPath() === null)) {
+				return false;
+			} else {
+				return $decodedEvent;
+			}
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -66,7 +84,13 @@ class NotifyHandler implements INotifyHandler {
 	 */
 	private function getRelativePath($path) {
 		if (substr($path, 0, strlen($this->basePath) + 1) === $this->basePath . '/') {
-			return substr($path, strlen($this->basePath) + 1);
+			$relativePath = substr($path, strlen($this->basePath) + 1);
+			preg_match($this->formatRegex, $relativePath, $matches);
+			if ($matches) {
+				return "${matches['user']}/files/${matches['path']}";
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}
