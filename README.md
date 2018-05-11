@@ -22,8 +22,23 @@ To process the notifications run the following `occ` command
 occ files_notify_redis:primary [-v] <list>
 ```
 
-## Requirements
+## Notify paths
 
-The app currently has the following requirements on the setup
+In order to correctly handle a change notification the app needs to translate between the path retrieved from redis and the path within the Nextcloud virtual file system.
 
-- User's home directories are in the default location of /path-to-data-dir/$user/files
+By default the app assumes that the path from redis is in the format of `/path-to-data-dir/$user/files/$path`.
+
+There are 2 ways to tweak this mapping.
+
+1. Using the `--prefix` option if the redis path start with a different prefix then the Nextcloud data directory.
+2. Using the `--format` option if the redis paths don't follow the same structure as the app assumes.
+
+### Example
+
+[vfs-notify-redis](https://github.com/icewind1991/samba_vfs_notify_redis) configured to log writes to `[homes]` shares will log paths in the format `/home/$user/$path` to the `notify` list.
+
+You can configure this app to handle those path using the following options.
+
+```
+occ files_notify_redis:primary -v --prefix '/home' --format '/$user/$path' notify
+```
