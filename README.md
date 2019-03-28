@@ -35,6 +35,29 @@ There are 2 ways to tweak this mapping.
 
 ### Example
 
+### Using inotify
+
+[notify-redis](https://github.com/icewind1991/notify-redis) set to listen to the data directory of the Nextcloud instance:
+
+```bash
+notify-redis /path/to/nextcloud/data redis://localhost notify
+```
+
+Then run the `files_notify_redis:primary` provided by this app
+
+```bash
+occ files_notify_redis:primary -v notify
+```
+
+The `files_notify_redis:primary` command expects all paths to be prefixed by the path to the data directory by default.
+In cases where the data directory is in different locations for `notify-redis` and Nextcloud (such as when running the notify command from an NFS server), you can configure the prefix using the `--prefix` option.
+
+```bash
+occ files_notify_redis:primary -v --prefix /path/to/data notify
+```
+
+### Using the samba plugin
+
 [vfs-notify-redis](https://github.com/icewind1991/samba_vfs_notify_redis) configured to log writes to `[homes]` shares will log paths in the format `/home/$user/$path` to the `notify` list.
 
 You can configure this app to handle those path using the following options.
