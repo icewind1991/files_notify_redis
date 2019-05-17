@@ -97,17 +97,30 @@ class NotifyHandler implements INotifyHandler {
 	}
 
 	private function decodeEvent($string) {
-		$parts = explode('|', $string);
-
-		switch ($parts[0]) {
-			case 'write':
-				return new Change(IChange::MODIFIED, $this->getRelativePath($parts[1]));
-			case 'remove':
-				return new Change(IChange::REMOVED, $this->getRelativePath($parts[1]));
-			case 'rename':
-				return new RenameChange(IChange::RENAMED, $this->getRelativePath($parts[1]), $this->getRelativePath($parts[2]));
+		$json = json_decode($string, true);
+		if (is_array($json)) {
+			$type = $json['event'];
+			$path = isset($json['from']) ? $json['from'] : $json['path'];
+			$target = isset($json['to']) ? $json['to'] : '';
+		} else {
+			$parts = explode('|', $string);
+			$type = $parts[0];
+			$path = $parts[1];
+			$target = isset($parts[2]) ? $parts[2] : '';
 		}
-		throw new \Error('Invalid event type ' . $parts[0]);
+
+		switch ($type) {
+			case 'write':
+			case 'modify':
+				return new Change(IChange::MODIFIED, $this->getRelativePath($path));
+			case 'remove':
+			case 'delete':
+				return new Change(IChange::REMOVED, $this->getRelativePath($path));
+			case 'rename':
+			case 'move':
+				return new RenameChange(IChange::RENAMED, $this->getRelativePath($path), $this->getRelativePath($target));
+		}
+		throw new \Error('Invalid event type ' . $type);
 	}
 
 	public function listen(callable $callback) {
