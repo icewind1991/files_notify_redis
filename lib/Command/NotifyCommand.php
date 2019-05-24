@@ -55,17 +55,45 @@ class NotifyCommand extends Base {
 			->setName('files_notify_redis:primary')
 			->setDescription('Listen for redis updated notifications for the primary local storage')
 			->addArgument('list', InputArgument::REQUIRED, 'redis list where the notifications are pushed')
+			->addOption('host', null, InputArgument::OPTIONAL, 'redis host, if not provided the system wide redis configuration will be used')
+			->addOption('port', null, InputArgument::OPTIONAL, 'redis port')
+			->addOption('password', null, InputArgument::OPTIONAL, 'redis password')
 			->addOption('prefix', 'p', InputOption::VALUE_REQUIRED, 'The prefix that is stripped from the path retrieved from redis, defaults to the Nextcloud data directory')
 			->addOption('format', 'f', InputOption::VALUE_REQUIRED, 'The format of the path retrieved from redis after the prefix is stripped', '/$user/files/$path');
 		parent::configure();
+	}
+
+	/**
+	 * @param $host
+	 * @param $port
+	 * @param $password
+	 * @return \Redis
+	 * @throws \Exception
+	 */
+	private function getRedis($host, $port, $password) {
+		if ($host) {
+			if (!$port) {
+				$port = 6379;
+			}
+			$instance = new \Redis();
+
+			$instance->connect($host, $port, 0.0);
+			if ($password) {
+				$instance->auth($password);
+			}
+			return $instance;
+		} else {
+			$redisFactory = \OC::$server->getGetRedisFactory();
+			return $redisFactory->getInstance();
+		}
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
 		$prefix = $input->getOption('prefix') ?? $dataDirectory;
 		$format = $input->getOption('format');
-		$redisFactory = \OC::$server->getGetRedisFactory();
-		$notifyHandler = new NotifyHandler($prefix, $redisFactory->getInstance(), $input->getArgument('list'), $format);
+		$redis = $this->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
+		$notifyHandler = new NotifyHandler($prefix, $redis, $input->getArgument('list'), $format);
 		$verbose = $input->getOption('verbose');
 
 		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {

@@ -6,13 +6,7 @@ This app adds support for handling filesystem notifications for local storage ba
 
 ## Usage
 
-This app depends on a separate program to push filesystem notifications into redis in the following format
-
-- `write|$path`
-- `remame|$from|$to`
-- `remove|$path`
-
-To a list in redis.
+This app depends on a separate program to push filesystem notifications into redis, the format for these notifications is described [here](https://github.com/icewind1991/nc-fs-events/).
 
 An example program to push the filesystem notifications into redis is [`notify-redis`](https://github.com/icewind1991/notify-redis)
 
@@ -32,6 +26,17 @@ There are 2 ways to tweak this mapping.
 
 1. Using the `--prefix` option if the redis path start with a different prefix then the Nextcloud data directory.
 2. Using the `--format` option if the redis paths don't follow the same structure as the app assumes.
+
+## Multiple redis servers
+
+For scalability it's possible to setup a system using multiple redis server and/or multiple Nextcloud workers.
+
+Any number of Nextcloud workers can listen to the same redis instance for notifications and multiple redis instances can be used
+with at least one Nextcloud worker listening to each redis instance, this way the notify system can scale horizontally with the
+only limitation being the central Nextcloud database instance. 
+
+When a redis server different from the Nextcloud default one should be used, you can pass the `--host`, `--port` and `--password`
+options.
 
 ### Example
 
