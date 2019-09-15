@@ -93,8 +93,15 @@ class NotifyCommand extends Base {
 		$prefix = $input->getOption('prefix') ?? $dataDirectory;
 		$format = $input->getOption('format');
 		$redis = $this->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
-		$notifyHandler = new NotifyHandler($prefix, $redis, $input->getArgument('list'), $format);
 		$verbose = $input->getOption('verbose');
+
+		$debugCallback = function ($message) use ($verbose, $output) {
+			if ($verbose) {
+				$output->writeln("<error>$message</error>");
+			}
+		};
+
+		$notifyHandler = new NotifyHandler($prefix, $redis, $input->getArgument('list'), $format, $debugCallback);
 
 		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {
 			if ($verbose) {
