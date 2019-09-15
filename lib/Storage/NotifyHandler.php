@@ -36,24 +36,33 @@ class NotifyHandler implements INotifyHandler {
 	/** @var string */
 	private $list;
 
+	/** @var string */
+	private $format;
+
 	/** @var string|false */
 	private $formatRegex;
+
+	/** @var callable */
+	private $debugCallback;
 
 	/**
 	 * @param string $basePath
 	 * @param \Redis $redis
 	 * @param string $list
 	 * @param string $format
+	 * @param callable $debugCallback
 	 */
-	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path') {
+	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path', callable $debugCallback) {
 		$this->basePath = rtrim($basePath, '/');
 		$this->redis = $redis;
 		$this->list = $list;
+		$this->format = $format;
 		$this->formatRegex = '|' . str_replace(
 				['\$user', '\$path'],
 				['(?P<user>[^/]+)', '(?P<path>.*)'],
 				preg_quote(ltrim($format, '/'), '|')
 			) . '|';
+		$this->debugCallback = $debugCallback;
 	}
 
 	/**
@@ -92,9 +101,13 @@ class NotifyHandler implements INotifyHandler {
 			if ($matches) {
 				return "${matches['user']}/files/${matches['path']}";
 			} else {
+				$format = $this->format;
+				($this->debugCallback)("path ($path) doesn't match format ($format)");
 				return null;
 			}
 		} else {
+			$basePath = $this->basePath;
+			($this->debugCallback)("path ($path) outside base path ($basePath)");
 			return null;
 		}
 	}
