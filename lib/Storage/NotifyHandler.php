@@ -102,7 +102,7 @@ class NotifyHandler implements INotifyHandler {
 				return "${matches['user']}/files/${matches['path']}";
 			} else {
 				$format = $this->format;
-				($this->debugCallback)("path ($path) doesn't match format ($format)");
+				($this->debugCallback)("path ($relativePath) doesn't match format ($format)");
 				return null;
 			}
 		} else {
