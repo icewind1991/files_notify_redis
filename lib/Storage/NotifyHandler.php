@@ -21,8 +21,8 @@
 
 namespace OCA\FilesNotifyRedis\Storage;
 
-use OC\Files\Notify\Change;
-use OC\Files\Notify\RenameChange;
+use OCA\FilesNotifyRedis\Change\RenameChange;
+use OCA\FilesNotifyRedis\Change\Change;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\INotifyHandler;
 
@@ -56,6 +56,9 @@ class NotifyHandler implements INotifyHandler {
 			) . '|';
 	}
 
+	/**
+	 * @return Change[]
+	 */
 	public function getChanges() {
 		$changes = [];
 		while ($change = $this->getChange()) {
@@ -102,25 +105,29 @@ class NotifyHandler implements INotifyHandler {
 			$type = $json['event'];
 			$path = isset($json['from']) ? $json['from'] : $json['path'];
 			$target = isset($json['to']) ? $json['to'] : '';
+			$time = isset($json['time']) ? \DateTime::createFromFormat(DATE_ATOM, $json['time']) : null;
+			$size = isset($json['size']) ? (int)$json['size'] : null;
 		} else {
 			$parts = explode('|', $string);
 			$type = $parts[0];
 			$path = $parts[1];
 			$target = isset($parts[2]) ? $parts[2] : '';
+			$time = null;
+			$size = null;
 		}
 
 		switch ($type) {
 			case 'write':
 			case 'modify':
-				return new Change(IChange::MODIFIED, $this->getRelativePath($path));
+				return new Change(IChange::MODIFIED, $this->getRelativePath($path), $time, $size);
 			case 'remove':
 			case 'delete':
-				return new Change(IChange::REMOVED, $this->getRelativePath($path));
+				return new Change(IChange::REMOVED, $this->getRelativePath($path), $time, $size);
 			case 'rename':
 			case 'move':
-				return new RenameChange(IChange::RENAMED, $this->getRelativePath($path), $this->getRelativePath($target));
+				return new RenameChange(IChange::RENAMED, $this->getRelativePath($path), $this->getRelativePath($target), $time);
 		}
-		throw new \Error('Invalid event type ' . $type);
+		throw new \Exception('Invalid event type ' . $type);
 	}
 
 	public function listen(callable $callback) {

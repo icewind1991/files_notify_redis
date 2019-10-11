@@ -22,10 +22,10 @@
 namespace OCA\FilesNotifyRedis\Command;
 
 use OC\Core\Command\Base;
+use OCA\FilesNotifyRedis\Change\Change;
+use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Storage\NotifyHandler;
 use OCP\Files\Config\IMountProviderCollection;
-use OCP\Files\Notify\IChange;
-use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;
 use OCP\IConfig;
 use OCP\IUser;
@@ -96,7 +96,7 @@ class NotifyCommand extends Base {
 		$notifyHandler = new NotifyHandler($prefix, $redis, $input->getArgument('list'), $format);
 		$verbose = $input->getOption('verbose');
 
-		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {
+		$notifyHandler->listen(function (Change $change) use ($verbose, $output) {
 			if ($verbose) {
 				$this->logUpdate($change, $output);
 			}
@@ -111,7 +111,7 @@ class NotifyCommand extends Base {
 		});
 	}
 
-	private function handleUpdate(IChange $change, IUser $user, $path) {
+	private function handleUpdate(Change $change, IUser $user, $path) {
 		$mount = $this->mountProviderCollection->getHomeMountForUser($user);
 		$updater = $mount->getStorage()->getUpdater();
 
@@ -124,7 +124,7 @@ class NotifyCommand extends Base {
 				$updater->remove($path);
 				break;
 			case INotifyStorage::NOTIFY_RENAMED:
-				/** @var IRenameChange $change */
+				/** @var RenameChange $change */
 				list($_, $targetPath) = explode('/', $change->getTargetPath(), 2);
 				$updater->renameFromStorage($mount->getStorage(), $path, $targetPath);
 				break;
@@ -133,7 +133,7 @@ class NotifyCommand extends Base {
 		}
 	}
 
-	private function logUpdate(IChange $change, OutputInterface $output) {
+	private function logUpdate(Change $change, OutputInterface $output) {
 		switch ($change->getType()) {
 			case INotifyStorage::NOTIFY_ADDED:
 				$text = 'added';
@@ -152,7 +152,7 @@ class NotifyCommand extends Base {
 		}
 
 		$text .= ' ' . $change->getPath();
-		if ($change instanceof IRenameChange) {
+		if ($change instanceof RenameChange) {
 			$text .= ' to ' . $change->getTargetPath();
 		}
 
