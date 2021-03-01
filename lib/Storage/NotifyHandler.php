@@ -52,7 +52,7 @@ class NotifyHandler implements INotifyHandler {
 	 * @param string $format
 	 * @param callable $debugCallback
 	 */
-	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path', callable $debugCallback) {
+	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path', callable $debugCallback = null) {
 		$this->basePath = rtrim($basePath, '/');
 		$this->redis = $redis;
 		$this->list = $list;
@@ -62,7 +62,12 @@ class NotifyHandler implements INotifyHandler {
 				['(?P<user>[^/]+)', '(?P<path>.*)'],
 				preg_quote(ltrim($format, '/'), '|')
 			) . '|';
-		$this->debugCallback = $debugCallback;
+		if ($debugCallback) {
+			$this->debugCallback = $debugCallback;
+		} else {
+			$this->debugCallback = function () {
+			};
+		}
 	}
 
 	/**
@@ -80,7 +85,7 @@ class NotifyHandler implements INotifyHandler {
 		$event = $this->redis->rPop($this->list);
 		if ($event) {
 			$decodedEvent = $this->decodeEvent($event);
-			if ($decodedEvent->getPath() === null || ($decodedEvent instanceof RenameChange && $decodedEvent->getTargetPath() === null)) {
+			if ($decodedEvent instanceof IChange && ($decodedEvent->getPath() === null || ($decodedEvent instanceof RenameChange && $decodedEvent->getTargetPath() === null))) {
 				return false;
 			} else {
 				return $decodedEvent;
@@ -112,7 +117,7 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
-	private function decodeEvent($string) {
+	private function decodeEvent($string): ?IChange {
 		$json = json_decode($string, true);
 		if (is_array($json)) {
 			$type = $json['event'];
@@ -129,16 +134,24 @@ class NotifyHandler implements INotifyHandler {
 			$size = null;
 		}
 
+		$relativePath = $this->getRelativePath($path);
+		if ($relativePath === null) {
+			return null;
+		}
 		switch ($type) {
 			case 'write':
 			case 'modify':
-				return new Change(IChange::MODIFIED, $this->getRelativePath($path), $time, $size);
+				return new Change(IChange::MODIFIED, $relativePath, $time, $size);
 			case 'remove':
 			case 'delete':
-				return new Change(IChange::REMOVED, $this->getRelativePath($path), $time, $size);
+				return new Change(IChange::REMOVED, $relativePath, $time, $size);
 			case 'rename':
 			case 'move':
-				return new RenameChange(IChange::RENAMED, $this->getRelativePath($path), $this->getRelativePath($target), $time);
+				$relativeTarget = $this->getRelativePath($target);
+				if ($relativeTarget === null) {
+					return null;
+				}
+				return new RenameChange(IChange::RENAMED, $relativePath, $relativeTarget, $time);
 		}
 		throw new \Exception('Invalid event type ' . $type);
 	}
