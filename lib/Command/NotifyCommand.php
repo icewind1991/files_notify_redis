@@ -108,7 +108,7 @@ class NotifyCommand extends Base {
 				$this->logUpdate($change, $output);
 			}
 
-			list ($userId, , $subPath) = explode('/', $change->getPath());
+			[$userId, , $subPath] = explode('/', $change->getPath());
 			$user = $this->userManager->get($userId);
 			if (!$user) {
 				$output->writeln("<error>Unknown user $userId</error>");
@@ -132,7 +132,7 @@ class NotifyCommand extends Base {
 				break;
 			case INotifyStorage::NOTIFY_RENAMED:
 				/** @var RenameChange $change */
-				list($_, $targetPath) = explode('/', $change->getTargetPath(), 2);
+				[$_, $targetPath] = explode('/', $change->getTargetPath(), 2);
 				$updater->renameFromStorage($mount->getStorage(), $path, $targetPath);
 				break;
 			default:

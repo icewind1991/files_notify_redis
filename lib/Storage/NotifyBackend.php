@@ -21,7 +21,6 @@
 
 namespace OCA\FilesNotifyRedis\Storage;
 
-use OC\RedisFactory;
 use OCA\Files_External\Lib\Auth\NullMechanism;
 use OCA\Files_External\Lib\Backend\Local;
 use OCP\IL10N;

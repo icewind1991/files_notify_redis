@@ -22,7 +22,6 @@
 namespace OCA\FilesNotifyRedis\Storage;
 
 use OC\Files\Storage\Local;
-use OC\RedisFactory;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;

@@ -27,7 +27,7 @@ use OCA\FilesNotifyRedis\Storage\NotifyBackend;
 use \OCP\AppFramework\App;
 
 class Application extends App implements IBackendProvider {
-	public function __construct(array $urlParams = array()) {
+	public function __construct(array $urlParams = []) {
 		parent::__construct('files_notify_redis', $urlParams);
 	}
 
