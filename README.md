@@ -20,7 +20,7 @@ occ files_notify_redis:primary [-v] <list>
 
 In order to correctly handle a change notification the app needs to translate between the path retrieved from redis and the path within the Nextcloud virtual file system.
 
-By default the app assumes that the path from redis is in the format of `/path-to-data-dir/$user/files/$path`.
+By default, the app assumes that the path from redis is in the format of `/path-to-data-dir/$user/files/$path`.
 
 There are 2 ways to tweak this mapping.
 
