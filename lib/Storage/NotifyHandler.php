@@ -85,7 +85,7 @@ class NotifyHandler implements INotifyHandler {
 		$event = $this->redis->rPop($this->list);
 		if ($event) {
 			$decodedEvent = $this->decodeEvent($event);
-			if ($decodedEvent instanceof IChange && ($decodedEvent->getPath() === null || ($decodedEvent instanceof RenameChange && $decodedEvent->getTargetPath() === null))) {
+			if ($decodedEvent === null) {
 				return false;
 			} else {
 				return $decodedEvent;
