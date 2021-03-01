@@ -1,3 +1,7 @@
 <?php
 
-(new \OCA\FilesNotifyRedis\AppInfo\Application())->register();
+use OCA\FilesNotifyRedis\AppInfo\Application;
+
+/** @var Application $application */
+$application = \OC::$server->query(Application::class);
+$application->register();
