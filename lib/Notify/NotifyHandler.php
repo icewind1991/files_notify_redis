@@ -53,10 +53,10 @@ class NotifyHandler implements INotifyHandler {
 		$this->list = $list;
 		$this->format = $format;
 		$this->formatRegex = '|' . str_replace(
-				['\$user', '\$path'],
-				['(?P<user>[^/]+)', '(?P<path>.*)'],
-				preg_quote(ltrim($format, '/'), '|')
-			) . '|';
+			['\$user', '\$path'],
+			['(?P<user>[^/]+)', '(?P<path>.*)'],
+			preg_quote(ltrim($format, '/'), '|')
+		) . '|';
 		$this->debugCallback = $debugCallback;
 	}
 
@@ -105,6 +105,10 @@ class NotifyHandler implements INotifyHandler {
 			$path = isset($json['from']) ? $json['from'] : $json['path'];
 			$target = isset($json['to']) ? $json['to'] : '';
 			$time = isset($json['time']) ? DateTime::createFromFormat(DATE_ATOM, $json['time']) : null;
+			// handle malformed date
+			if ($time === false) {
+				$time = null;
+			}
 			$size = isset($json['size']) ? (int)$json['size'] : null;
 		} else {
 			$parts = explode('|', $string);

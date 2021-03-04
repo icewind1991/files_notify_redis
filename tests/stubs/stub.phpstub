@@ -1,0 +1,84 @@
+<?php
+
+declare(strict_types=1);
+
+use OCP\Files\Storage\IStorage;
+
+/**
+ * @copyright Copyright (c) 2021 Robin Appelman <robin@icewind.nl>
+ *
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+namespace OC\Core\Command {
+
+	use Symfony\Component\Console\Command\Command;
+	use Symfony\Component\Console\Input\InputInterface;
+	use Symfony\Component\Console\Output\OutputInterface;
+
+	class Base extends Command {
+		public const OUTPUT_FORMAT_PLAIN = 'plain';
+		public const OUTPUT_FORMAT_JSON = 'json';
+		public const OUTPUT_FORMAT_JSON_PRETTY = 'json_pretty';
+
+		protected function writeArrayInOutputFormat(InputInterface $input, OutputInterface $output, $items, $prefix = '  - ') {
+		}
+	}
+}
+
+namespace OC\Files\Notify {
+
+	use OCP\Files\Notify\IChange;
+	use OCP\Files\Notify\IRenameChange;
+
+	class Change implements IChange {
+		public function __construct(int $type, string $path) {
+		}
+
+		public function getType() {
+		}
+
+		public function getPath() {
+		}
+
+	}
+
+	class RenameChange implements IRenameChange {
+		public function __construct(int $type, string $source, string $target) {
+		}
+
+		public function getType() {
+		}
+
+		public function getPath() {
+		}
+
+		public function getTargetPath() {
+		}
+	}
+}
+
+namespace OC\User {
+	class NoUserException extends \Exception {
+	}
+}
+
+namespace OC\Files\Storage {
+	interface Storage extends IStorage {
+
+	}
+}

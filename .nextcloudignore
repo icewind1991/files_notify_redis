@@ -1,0 +1,12 @@
+.drone
+.git
+.github
+.gitignore
+.travis.yml
+krankerl.toml
+screenshots
+.nextcloudignore
+composer*
+._php_cs*
+tests
+psalm.xml

@@ -28,6 +28,7 @@ use OCA\FilesNotifyRedis\Change\Change;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Notify\ChangeHandler;
 use OCA\FilesNotifyRedis\Notify\NotifyHandler;
+use OCP\Files\Notify\IChange;
 use OCP\Files\Storage\INotifyStorage;
 use OCP\IConfig;
 use Redis;
@@ -119,7 +120,7 @@ class NotifyCommand extends Base {
 		return 0;
 	}
 
-	private function logUpdate(Change $change, OutputInterface $output) {
+	private function logUpdate(IChange $change, OutputInterface $output) {
 		switch ($change->getType()) {
 			case INotifyStorage::NOTIFY_ADDED:
 				$text = 'added';
