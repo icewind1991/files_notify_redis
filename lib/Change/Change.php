@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace OCA\FilesNotifyRedis\Change;
 
+use DateTime;
+
 /**
  * Extend core change class with extra metadata fields
  */
@@ -30,24 +32,18 @@ class Change extends \OC\Files\Notify\Change {
 	private $time;
 	private $size;
 
-	public function __construct(int $type, string $path, \DateTime $time = null, int $size = null) {
+	public function __construct(int $type, string $path, DateTime $time = null, int $size = null) {
 		parent::__construct($type, $path);
 
 		$this->time = $time;
 		$this->size = $size;
 	}
 
-	/**
-	 * @return int|null
-	 */
-	public function getSize() {
+	public function getSize(): ?int {
 		return $this->size;
 	}
 
-	/**
-	 * @return \DateTime|null
-	 */
-	public function getTime() {
+	public function getTime(): ?DateTime {
 		return $this->time;
 	}
 }

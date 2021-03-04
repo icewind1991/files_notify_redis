@@ -19,18 +19,20 @@
  *
  */
 
-namespace OCA\FilesNotifyRedis\Storage;
+namespace OCA\FilesNotifyRedis\Notify;
 
+use DateTime;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Change\Change;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\INotifyHandler;
+use Redis;
 
 class NotifyHandler implements INotifyHandler {
 	/** @var string */
 	private $basePath;
 
-	/** @var \Redis */
+	/** @var Redis */
 	private $redis;
 
 	/** @var string */
@@ -45,14 +47,7 @@ class NotifyHandler implements INotifyHandler {
 	/** @var callable */
 	private $debugCallback;
 
-	/**
-	 * @param string $basePath
-	 * @param \Redis $redis
-	 * @param string $list
-	 * @param string $format
-	 * @param callable $debugCallback
-	 */
-	public function __construct($basePath, \Redis $redis, $list = 'notify', $format = '/$user/files/$path', callable $debugCallback = null) {
+	public function __construct(string $basePath, Redis $redis, string $list, string $format, callable $debugCallback) {
 		$this->basePath = rtrim($basePath, '/');
 		$this->redis = $redis;
 		$this->list = $list;
@@ -62,18 +57,13 @@ class NotifyHandler implements INotifyHandler {
 				['(?P<user>[^/]+)', '(?P<path>.*)'],
 				preg_quote(ltrim($format, '/'), '|')
 			) . '|';
-		if ($debugCallback) {
-			$this->debugCallback = $debugCallback;
-		} else {
-			$this->debugCallback = function () {
-			};
-		}
+		$this->debugCallback = $debugCallback;
 	}
 
 	/**
 	 * @return Change[]
 	 */
-	public function getChanges() {
+	public function getChanges(): array {
 		$changes = [];
 		while ($change = $this->getChange()) {
 			$changes[] = $change;
@@ -81,25 +71,16 @@ class NotifyHandler implements INotifyHandler {
 		return $changes;
 	}
 
-	private function getChange() {
+	private function getChange(): ?IChange {
 		$event = $this->redis->rPop($this->list);
 		if ($event) {
-			$decodedEvent = $this->decodeEvent($event);
-			if ($decodedEvent === null) {
-				return false;
-			} else {
-				return $decodedEvent;
-			}
+			return $this->decodeEvent($event);
 		} else {
-			return false;
+			return null;
 		}
 	}
 
-	/**
-	 * @param $path
-	 * @return string
-	 */
-	private function getRelativePath($path) {
+	private function getRelativePath(string $path): ?string {
 		if (substr($path, 0, strlen($this->basePath) + 1) === $this->basePath . '/') {
 			$relativePath = substr($path, strlen($this->basePath) + 1);
 			preg_match($this->formatRegex, $relativePath, $matches);
@@ -123,7 +104,7 @@ class NotifyHandler implements INotifyHandler {
 			$type = $json['event'];
 			$path = isset($json['from']) ? $json['from'] : $json['path'];
 			$target = isset($json['to']) ? $json['to'] : '';
-			$time = isset($json['time']) ? \DateTime::createFromFormat(DATE_ATOM, $json['time']) : null;
+			$time = isset($json['time']) ? DateTime::createFromFormat(DATE_ATOM, $json['time']) : null;
 			$size = isset($json['size']) ? (int)$json['size'] : null;
 		} else {
 			$parts = explode('|', $string);
@@ -152,8 +133,10 @@ class NotifyHandler implements INotifyHandler {
 					return null;
 				}
 				return new RenameChange(IChange::RENAMED, $relativePath, $relativeTarget, $time);
+			default:
+				($this->debugCallback)("Invalid event type $type");
+				return null;
 		}
-		throw new \Exception('Invalid event type ' . $type);
 	}
 
 	public function listen(callable $callback) {

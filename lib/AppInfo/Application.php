@@ -21,33 +21,10 @@
 
 namespace OCA\FilesNotifyRedis\AppInfo;
 
-use OCA\Files_External\Lib\Config\IBackendProvider;
-use OCA\Files_External\Service\BackendService;
-use OCA\FilesNotifyRedis\Storage\NotifyBackend;
 use \OCP\AppFramework\App;
 
-class Application extends App implements IBackendProvider {
+class Application extends App {
 	public function __construct(array $urlParams = []) {
 		parent::__construct('files_notify_redis', $urlParams);
-	}
-
-	public function register() {
-		if (\OC::$CLI) {
-			/** @var \OC\Server $server */
-			$server = $this->getContainer()->getServer();
-
-			/** @var BackendService $backendService */
-			$backendService = $server->query(BackendService::class);
-
-			$backendService->registerBackendProvider($this);
-		}
-	}
-
-	public function getBackends() {
-		$container = $this->getContainer();
-
-		return [
-			$container->query(NotifyBackend::class)
-		];
 	}
 }

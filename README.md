@@ -29,10 +29,10 @@ There are 2 ways to tweak this mapping.
 
 ## Multiple redis servers
 
-For scalability it's possible to setup a system using multiple redis server and/or multiple Nextcloud workers.
+For scalability, it is possible to set up a system using multiple redis server and/or multiple Nextcloud workers.
 
 Any number of Nextcloud workers can listen to the same redis instance for notifications and multiple redis instances can be used
-with at least one Nextcloud worker listening to each redis instance, this way the notify system can scale horizontally with the
+with at least one Nextcloud worker listening to each redis instance, this way the notify-system can scale horizontally with the
 only limitation being the central Nextcloud database instance. 
 
 When a redis server different from the Nextcloud default one should be used, you can pass the `--host`, `--port` and `--password`
@@ -65,7 +65,7 @@ occ files_notify_redis:primary -v --prefix /path/to/data notify
 
 [vfs-notify-redis](https://github.com/icewind1991/samba_vfs_notify_redis) configured to log writes to `[homes]` shares will log paths in the format `/home/$user/$path` to the `notify` list.
 
-You can configure this app to handle those path using the following options.
+You can configure this app to handle those paths using the following options.
 
 ```
 occ files_notify_redis:primary -v --prefix '/home' --format '/$user/$path' notify

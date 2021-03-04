@@ -21,33 +21,29 @@
 
 namespace OCA\FilesNotifyRedis\Command;
 
+use Exception;
+use OC;
 use OC\Core\Command\Base;
 use OCA\FilesNotifyRedis\Change\Change;
 use OCA\FilesNotifyRedis\Change\RenameChange;
-use OCA\FilesNotifyRedis\Storage\NotifyHandler;
-use OCP\Files\Config\IMountProviderCollection;
+use OCA\FilesNotifyRedis\Notify\ChangeHandler;
+use OCA\FilesNotifyRedis\Notify\NotifyHandler;
 use OCP\Files\Storage\INotifyStorage;
 use OCP\IConfig;
-use OCP\IUser;
-use OCP\IUserManager;
+use Redis;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyCommand extends Base {
-	/** @var IConfig */
 	private $config;
-	/** @var IMountProviderCollection */
-	private $mountProviderCollection;
-	/** @var IUserManager */
-	private $userManager;
+	private $changeHandler;
 
-	public function __construct() {
+	public function __construct(IConfig $config, ChangeHandler $changeHandler) {
 		parent::__construct();
-		$this->config = \OC::$server->getConfig();
-		$this->mountProviderCollection = \OC::$server->getMountProviderCollection();
-		$this->userManager = \OC::$server->getUserManager();
+		$this->config = $config;
+		$this->changeHandler = $changeHandler;
 	}
 
 	protected function configure() {
@@ -67,15 +63,15 @@ class NotifyCommand extends Base {
 	 * @param $host
 	 * @param $port
 	 * @param $password
-	 * @return \Redis
-	 * @throws \Exception
+	 * @return Redis
+	 * @throws Exception
 	 */
-	private function getRedis($host, $port, $password) {
+	private function getRedis($host, $port, $password): Redis {
 		if ($host) {
 			if (!$port) {
 				$port = 6379;
 			}
-			$instance = new \Redis();
+			$instance = new Redis();
 
 			$instance->connect($host, $port, 0.0);
 			if ($password) {
@@ -83,16 +79,21 @@ class NotifyCommand extends Base {
 			}
 			return $instance;
 		} else {
-			$redisFactory = \OC::$server->getGetRedisFactory();
+			$redisFactory = OC::$server->getGetRedisFactory();
 			return $redisFactory->getInstance();
 		}
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
 		$prefix = $input->getOption('prefix') ?? $dataDirectory;
 		$format = $input->getOption('format');
-		$redis = $this->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
+		try {
+			$redis = $this->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
+		} catch (Exception $e) {
+			$output->writeln("<error>Failed to get redis connection</error>");
+			return 1;
+		}
 		$verbose = $input->getOption('verbose');
 
 		$debugCallback = function ($message) use ($verbose, $output) {
@@ -108,36 +109,14 @@ class NotifyCommand extends Base {
 				$this->logUpdate($change, $output);
 			}
 
-			[$userId, , $subPath] = explode('/', $change->getPath());
-			$user = $this->userManager->get($userId);
-			if (!$user) {
-				$output->writeln("<error>Unknown user $userId</error>");
-			} else {
-				$this->handleUpdate($change, $user, 'files/' . $subPath);
+			try {
+				$this->changeHandler->applyChange($change);
+			} catch (Exception $e) {
+				$output->writeln("<error>" . $e->getMessage() . "</error>");
 			}
 		});
-	}
 
-	private function handleUpdate(Change $change, IUser $user, $path) {
-		$mount = $this->mountProviderCollection->getHomeMountForUser($user);
-		$updater = $mount->getStorage()->getUpdater();
-
-		switch ($change->getType()) {
-			case INotifyStorage::NOTIFY_ADDED:
-			case INotifyStorage::NOTIFY_MODIFIED:
-				$updater->update($path);
-				break;
-			case INotifyStorage::NOTIFY_REMOVED:
-				$updater->remove($path);
-				break;
-			case INotifyStorage::NOTIFY_RENAMED:
-				/** @var RenameChange $change */
-				[$_, $targetPath] = explode('/', $change->getTargetPath(), 2);
-				$updater->renameFromStorage($mount->getStorage(), $path, $targetPath);
-				break;
-			default:
-				return;
-		}
+		return 0;
 	}
 
 	private function logUpdate(Change $change, OutputInterface $output) {
