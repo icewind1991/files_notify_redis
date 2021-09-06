@@ -119,6 +119,11 @@ class NotifyHandler implements INotifyHandler {
 			$size = null;
 		}
 
+		if (!is_string($path) || !is_string($type)) {
+			($this->debugCallback)("malformed event: '$string'");
+			return null;
+		}
+
 		$relativePath = $this->getRelativePath($path);
 		if ($relativePath === null) {
 			return null;
