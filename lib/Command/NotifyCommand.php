@@ -24,7 +24,6 @@ namespace OCA\FilesNotifyRedis\Command;
 use Exception;
 use OC;
 use OC\Core\Command\Base;
-use OCA\FilesNotifyRedis\Change\Change;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Notify\ChangeHandler;
 use OCA\FilesNotifyRedis\Notify\NotifyHandler;
