@@ -50,7 +50,7 @@ class NotifyHandlerTest extends TestCase {
 		});
 		$this->list[] = json_encode([
 			"event" => "modify",
-			"path" => "/base/foo/files/the/path",
+			"path"  => "/base/foo/files/the/path",
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
@@ -61,7 +61,7 @@ class NotifyHandlerTest extends TestCase {
 
 		$this->list[] = json_encode([
 			"event" => "delete",
-			"path" => "/base/foo/files/the/path",
+			"path"  => "/base/foo/files/the/path",
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
@@ -72,8 +72,8 @@ class NotifyHandlerTest extends TestCase {
 
 		$this->list[] = json_encode([
 			"event" => "move",
-			"from" => "/base/foo/files/the/path",
-			"to" => "/base/foo/files/the/target",
+			"from"  => "/base/foo/files/the/path",
+			"to"    => "/base/foo/files/the/target",
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
@@ -89,9 +89,9 @@ class NotifyHandlerTest extends TestCase {
 		});
 		$this->list[] = json_encode([
 			"event" => "modify",
-			"path" => "/base/foo/files/the/path",
-			"time" => "2019-05-13T10:58:35-0400",
-			"size" => 1024,
+			"path"  => "/base/foo/files/the/path",
+			"time"  => "2019-05-13T10:58:35-0400",
+			"size"  => 1024,
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
@@ -106,11 +106,11 @@ class NotifyHandlerTest extends TestCase {
 		});
 		$this->list[] = json_encode([
 			"event" => "modify",
-			"path" => "/base/foo/files/the/path1",
+			"path"  => "/base/foo/files/the/path1",
 		]);
 		$this->list[] = json_encode([
 			"event" => "modify",
-			"path" => "/base/foo/files/the/path2",
+			"path"  => "/base/foo/files/the/path2",
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(2, $changes);
@@ -138,7 +138,7 @@ class NotifyHandlerTest extends TestCase {
 		});
 		$this->list[] = json_encode([
 			"event" => "modify",
-			"path" => $input,
+			"path"  => $input,
 		]);
 		$changes = $handler->getChanges();
 		if ($expected) {
