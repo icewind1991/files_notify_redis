@@ -38,8 +38,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyCommand extends Base {
-	private $config;
-	private $changeHandler;
+	private IConfig $config;
+	private ChangeHandler $changeHandler;
 
 	public function __construct(IConfig $config, ChangeHandler $changeHandler) {
 		parent::__construct();
@@ -105,7 +105,7 @@ class NotifyCommand extends Base {
 
 		$notifyHandler = new NotifyHandler($prefix, $redis, $input->getArgument('list'), $format, $debugCallback);
 
-		$notifyHandler->listen(function (Change $change) use ($verbose, $output) {
+		$notifyHandler->listen(function (IChange $change) use ($verbose, $output) {
 			if ($verbose) {
 				$this->logUpdate($change, $output);
 			}

@@ -29,17 +29,10 @@ use OCP\Files\Notify\INotifyHandler;
 use Redis;
 
 class NotifyHandler implements INotifyHandler {
-	/** @var string */
-	private $basePath;
-
-	/** @var Redis */
-	private $redis;
-
-	/** @var string */
-	private $list;
-
-	/** @var string */
-	private $format;
+	private string $basePath;
+	private Redis $redis;
+	private string $list;
+	private string $format;
 
 	/** @var string|false */
 	private $formatRegex;
@@ -102,8 +95,8 @@ class NotifyHandler implements INotifyHandler {
 		$json = json_decode($string, true);
 		if (is_array($json)) {
 			$type = $json['event'];
-			$path = isset($json['from']) ? $json['from'] : $json['path'];
-			$target = isset($json['to']) ? $json['to'] : '';
+			$path = $json['from'] ?? $json['path'];
+			$target = $json['to'] ?? '';
 			$time = isset($json['time']) ? DateTime::createFromFormat(DATE_ATOM, $json['time']) : null;
 			// handle malformed date
 			if ($time === false) {
@@ -114,7 +107,7 @@ class NotifyHandler implements INotifyHandler {
 			$parts = explode('|', $string);
 			$type = $parts[0];
 			$path = $parts[1];
-			$target = isset($parts[2]) ? $parts[2] : '';
+			$target = $parts[2] ?? '';
 			$time = null;
 			$size = null;
 		}

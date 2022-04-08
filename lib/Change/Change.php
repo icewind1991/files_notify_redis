@@ -29,8 +29,8 @@ use DateTime;
  * Extend core change class with extra metadata fields
  */
 class Change extends \OC\Files\Notify\Change {
-	private $time;
-	private $size;
+	private ?DateTime $time;
+	private ?int $size;
 
 	public function __construct(int $type, string $path, DateTime $time = null, int $size = null) {
 		parent::__construct($type, $path);
