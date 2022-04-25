@@ -37,8 +37,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyCommand extends Base {
-	private IConfig $config;
-	private ChangeHandler $changeHandler;
+	/** @var IConfig $config */
+	private $config;
+	/** @var ChangeHandler $changeHandler */
+	private $changeHandler;
 
 	public function __construct(IConfig $config, ChangeHandler $changeHandler) {
 		parent::__construct();

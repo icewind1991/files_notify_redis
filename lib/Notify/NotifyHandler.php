@@ -29,10 +29,14 @@ use OCP\Files\Notify\INotifyHandler;
 use Redis;
 
 class NotifyHandler implements INotifyHandler {
-	private string $basePath;
-	private Redis $redis;
-	private string $list;
-	private string $format;
+	/** @var string $basePath */
+	private $basePath;
+	/** @var Redis $redis */
+	private $redis;
+	/** @var string $list */
+	private $list;
+	/** @var string $format */
+	private $format;
 
 	/** @var string|false */
 	private $formatRegex;

@@ -26,7 +26,8 @@ namespace OCA\FilesNotifyRedis\Change;
 use DateTime;
 
 class RenameChange extends \OC\Files\Notify\RenameChange {
-	private ?DateTime $time;
+	/** @var DateTime|null */
+	private $time;
 
 	public function __construct(int $type, string $path, string $targetPath, DateTime $time = null) {
 		parent::__construct($type, $path, $targetPath);

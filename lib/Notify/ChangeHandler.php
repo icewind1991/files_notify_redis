@@ -32,7 +32,9 @@ use OCP\IUser;
 use OCP\IUserManager;
 
 class ChangeHandler {
+	/** @var IUserManager $userManager */
 	private $userManager;
+	/** @var IMountProviderCollection $mountProviderCollection */
 	private $mountProviderCollection;
 
 	public function __construct(IUserManager $userManager, IMountProviderCollection $mountProviderCollection) {
