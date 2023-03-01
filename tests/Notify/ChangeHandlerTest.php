@@ -23,57 +23,62 @@ declare(strict_types=1);
 
 namespace OCA\FilesNotifyRedis\Tests\Notify;
 
+use OC\Files\Storage\Temporary;
+use OC\User\User;
 use OCA\FilesNotifyRedis\Change\Change;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Notify\ChangeHandler;
-use OCP\Files\Config\IMountProviderCollection;
+use OCP\Files\Mount\IMountManager;
+use OCP\Files\Mount\IMountPoint;
 use OCP\Files\Notify\IChange;
+use OCP\Files\Storage\IStorage;
+use OCP\IUser;
 use OCP\IUserManager;
 use Test\TestCase;
-use Test\Traits\UserTrait;
 
 /**
  * @group DB
  */
 class ChangeHandlerTest extends TestCase {
-	use UserTrait;
-
-	/** @var IUserManager */
-	private $userManager;
-	/** @var IMountProviderCollection */
-	private $mountProviderCollection;
+	private IUserManager $userManager;
+	private IMountManager $mountManager;
+	private IStorage $storage;
 
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->userManager = \OC::$server->query(IUserManager::class);
-		$this->mountProviderCollection = \OC::$server->query(IMountProviderCollection::class);
+		$this->userManager = $this->createMock(IUserManager::class);
+		$this->mountManager = $this->createMock(IMountManager::class);
+		$this->storage = new Temporary();
 
-		$this->createUser("user1", "");
+		$this->userManager->method('get')
+			->willReturnCallback(function(string $userId) {
+				$user = $this->createMock(IUser::class);
+				$user->method('getUID')
+					->willReturn($userId);
+				return $user;
+			});
+		$mount = $this->createMock(IMountPoint::class);
+		$mount->method('getStorage')
+			->willReturn($this->storage);
+		$mount->method('getInternalPath')
+			->willReturnCallback(function(string $path) {
+				return substr($path, strlen("/user1/"));
+			});
+		$this->mountManager->method('find')
+			->willReturn($mount);
 	}
-
-	protected function tearDown(): void {
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$storage->rmdir('files');
-		$storage->getCache()->clear();
-
-		parent::tearDown();
-	}
-
 
 	public function testWriteChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new Change(IChange::MODIFIED, "user1/files/path");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->getScanner()->scan('');
 		$this->assertTrue($cache->inCache('files'));
-		$storage->file_put_contents('files/path', 'asd');
+		$this->storage->file_put_contents('files/path', 'asd');
 		$this->assertFalse($cache->inCache('files/path'));
 
 		$handler->applyChange($change);
@@ -82,15 +87,13 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testWriteChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new Change(IChange::MODIFIED, "user1/files/path");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->getScanner()->scan('');
 		$this->assertTrue($cache->inCache('files'));
 		$this->assertFalse($cache->inCache('files/path'));
 
@@ -100,16 +103,14 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testRenameChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->file_put_contents('files/path', 'asd');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->file_put_contents('files/path', 'asd');
+		$this->storage->getScanner()->scan('');
 		$this->assertTrue($cache->inCache('files/path'));
 		$this->assertFalse($cache->inCache('files/target'));
 
@@ -120,15 +121,13 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testRenameChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->getScanner()->scan('');
 		$this->assertFalse($cache->inCache('files/path'));
 		$this->assertFalse($cache->inCache('files/target'));
 
@@ -139,16 +138,14 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testDeleteChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new Change(IChange::REMOVED, "user1/files/path");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->file_put_contents('files/path', 'asd');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->file_put_contents('files/path', 'asd');
+		$this->storage->getScanner()->scan('');
 		$this->assertTrue($cache->inCache('files/path'));
 
 		$handler->applyChange($change);
@@ -157,15 +154,13 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testDeleteChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountProviderCollection);
+		$handler = new ChangeHandler($this->userManager, $this->mountManager);
 		$change = new Change(IChange::REMOVED, "user1/files/path");
 
-		$homeMount = $this->mountProviderCollection->getHomeMountForUser($this->userManager->get("user1"));
-		$storage = $homeMount->getStorage();
-		$cache = $storage->getCache();
-		$storage->mkdir('');
-		$storage->mkdir('files');
-		$storage->getScanner()->scan('');
+		$cache = $this->storage->getCache();
+		$this->storage->mkdir('');
+		$this->storage->mkdir('files');
+		$this->storage->getScanner()->scan('');
 		$this->assertFalse($cache->inCache('files/path'));
 
 		$handler->applyChange($change);

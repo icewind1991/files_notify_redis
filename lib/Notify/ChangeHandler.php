@@ -25,6 +25,7 @@ namespace OCA\FilesNotifyRedis\Notify;
 
 use OC\User\NoUserException;
 use OCP\Files\Config\IMountProviderCollection;
+use OCP\Files\Mount\IMountManager;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;
@@ -32,12 +33,12 @@ use OCP\IUser;
 use OCP\IUserManager;
 
 class ChangeHandler {
-	private $userManager;
-	private $mountProviderCollection;
+	private IUserManager $userManager;
+	private IMountManager $mountManager;
 
-	public function __construct(IUserManager $userManager, IMountProviderCollection $mountProviderCollection) {
+	public function __construct(IUserManager $userManager, IMountManager $mountManager) {
 		$this->userManager = $userManager;
-		$this->mountProviderCollection = $mountProviderCollection;
+		$this->mountManager = $mountManager;
 	}
 
 	/**
@@ -47,31 +48,32 @@ class ChangeHandler {
 	 * @throws NoUserException
 	 */
 	public function applyChange(IChange $change) {
-		[$userId, $path] = explode('/', $change->getPath(), 2);
+		[$userId] = explode('/', $change->getPath(), 2);
 		$user = $this->userManager->get($userId);
 		if (!$user) {
 			throw new NoUserException("Unknown user $userId");
 		} else {
-			$this->handleUpdate($change, $user, $path);
+			$this->handleUpdate($change, '/' . $change->getPath());
 		}
 	}
 
-	private function handleUpdate(IChange $change, IUser $user, $path) {
-		$mount = $this->mountProviderCollection->getHomeMountForUser($user);
+	private function handleUpdate(IChange $change, string $path) {
+		$mount = $this->mountManager->find($path);
+		$internalPath = $mount->getInternalPath($path);
 		$updater = $mount->getStorage()->getUpdater();
 
 		switch ($change->getType()) {
 			case INotifyStorage::NOTIFY_ADDED:
 			case INotifyStorage::NOTIFY_MODIFIED:
-				$updater->update($path);
+				$updater->update($internalPath);
 				break;
 			case INotifyStorage::NOTIFY_REMOVED:
-				$updater->remove($path);
+				$updater->remove($internalPath);
 				break;
 			case INotifyStorage::NOTIFY_RENAMED:
 				/** @var IRenameChange $change */
-				[, $targetPath] = explode('/', $change->getTargetPath(), 2);
-				$updater->renameFromStorage($mount->getStorage(), $path, $targetPath);
+				$targetInternalPath = $mount->getInternalPath('/' . $change->getTargetPath());
+				$updater->renameFromStorage($mount->getStorage(), $internalPath, $targetInternalPath);
 				break;
 		}
 	}
