@@ -8,13 +8,13 @@
 	<licence>AGPL</licence>
 	<author>Robin Appelman</author>
 	<namespace>FilesNotifyRedis</namespace>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<types>
 		<filesystem/>
 	</types>
 
 	<dependencies>
-		<nextcloud min-version="20" max-version="24"/>
+		<nextcloud min-version="23" max-version="26"/>
 	</dependencies>
 
 	<commands>
