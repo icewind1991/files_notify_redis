@@ -1,17 +1,26 @@
 <?xml version="1.0"?>
-<info>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>files_notify_redis</id>
 	<name>Redis Notify</name>
 	<summary>Handle filesystem changes pushed to redis</summary>
 	<description><![CDATA[Adds support for handling filesystem notifications for local storages that are pushed into redis]]>
 	</description>
-	<licence>AGPL</licence>
+	<version>0.2.0</version>
+	<licence>agpl</licence>
 	<author>Robin Appelman</author>
 	<namespace>FilesNotifyRedis</namespace>
-	<version>0.2.0</version>
 	<types>
 		<filesystem/>
 	</types>
+
+	<category>files</category>
+
+	<website>https://github.com/icewind1991/files_notify_redis</website>
+	<bugs>https://github.com/icewind1991/files_notify_redis/issues</bugs>
+	<repository type="git">
+		https://github.com/icewind1991/files_notify_redis.git
+	</repository>
 
 	<dependencies>
 		<nextcloud min-version="23" max-version="26"/>
@@ -20,11 +29,4 @@
 	<commands>
 		<command>OCA\FilesNotifyRedis\Command\NotifyCommand</command>
 	</commands>
-
-	<category>files</category>
-	<website>https://github.com/icewind1991/files_notify_redis</website>
-	<bugs>https://github.com/icewind1991/files_notify_redis/issues</bugs>
-	<repository type="git">
-		https://github.com/icewind1991/files_notify_redis.git
-	</repository>
 </info>
