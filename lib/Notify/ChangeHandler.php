@@ -24,12 +24,10 @@ declare(strict_types=1);
 namespace OCA\FilesNotifyRedis\Notify;
 
 use OC\User\NoUserException;
-use OCP\Files\Config\IMountProviderCollection;
 use OCP\Files\Mount\IMountManager;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;
-use OCP\IUser;
 use OCP\IUserManager;
 
 class ChangeHandler {

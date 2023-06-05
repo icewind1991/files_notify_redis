@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace OCA\FilesNotifyRedis\Tests\Notify;
 
 use OC\Files\Storage\Temporary;
-use OC\User\User;
 use OCA\FilesNotifyRedis\Change\Change;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Notify\ChangeHandler;
@@ -52,7 +51,7 @@ class ChangeHandlerTest extends TestCase {
 		$this->storage = new Temporary();
 
 		$this->userManager->method('get')
-			->willReturnCallback(function(string $userId) {
+			->willReturnCallback(function (string $userId) {
 				$user = $this->createMock(IUser::class);
 				$user->method('getUID')
 					->willReturn($userId);
@@ -62,7 +61,7 @@ class ChangeHandlerTest extends TestCase {
 		$mount->method('getStorage')
 			->willReturn($this->storage);
 		$mount->method('getInternalPath')
-			->willReturnCallback(function(string $path) {
+			->willReturnCallback(function (string $path) {
 				return substr($path, strlen("/user1/"));
 			});
 		$this->mountManager->method('find')

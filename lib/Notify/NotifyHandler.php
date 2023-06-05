@@ -22,8 +22,8 @@
 namespace OCA\FilesNotifyRedis\Notify;
 
 use DateTime;
-use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Change\Change;
+use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\INotifyHandler;
 use Redis;
