@@ -6,7 +6,7 @@
 	<summary>Handle filesystem changes pushed to redis</summary>
 	<description><![CDATA[Adds support for handling filesystem notifications for local storages that are pushed into redis]]>
 	</description>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<licence>agpl</licence>
 	<author>Robin Appelman</author>
 	<namespace>FilesNotifyRedis</namespace>
@@ -23,7 +23,7 @@
 	</repository>
 
 	<dependencies>
-		<nextcloud min-version="23" max-version="26"/>
+		<nextcloud min-version="24" max-version="27"/>
 	</dependencies>
 
 	<commands>
