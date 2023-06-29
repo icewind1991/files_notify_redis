@@ -158,6 +158,7 @@ class NotifyHandler implements INotifyHandler {
 			$change = $this->getChange();
 			if (!$change) {
 				// sleep while listening for stop signal
+				/** @psalm-suppress RedundantCondition */
 				for ($i = 0; ($i < 10 && $active); $i++) {
 					if (function_exists('pcntl_signal_dispatch')) {
 						pcntl_signal_dispatch();
@@ -177,6 +178,7 @@ class NotifyHandler implements INotifyHandler {
 	}
 
 	public function getCount(): int {
+		/** @psalm-suppress InvalidCast */
 		return (int)$this->redis->get($this->list . '_count');
 	}
 }

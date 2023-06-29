@@ -82,3 +82,11 @@ namespace OC\Files\Storage {
 
 	}
 }
+
+namespace OC {
+	class RedisFactory {
+		public function getInstance(): \Redis {
+
+		}
+	}
+}
