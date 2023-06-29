@@ -65,12 +65,13 @@ class NotifyHandler implements INotifyHandler {
 	}
 
 	private function getChange(): ?IChange {
-		$event = $this->redis->rPop($this->list);
-		if ($event) {
-			return $this->decodeEvent($event);
-		} else {
-			return null;
+		while ($event = $this->redis->rPop($this->list)) {
+			$decoded = $this->decodeEvent($event);
+			if ($decoded) {
+				return $decoded;
+			}
 		}
+		return null;
 	}
 
 	private function getRelativePath(string $path): ?string {
