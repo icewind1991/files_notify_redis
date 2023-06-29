@@ -38,11 +38,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class NotifyCommand extends Base {
 	private IConfig $config;
+	private RedisFactory $redisFactory;
 	private ChangeHandler $changeHandler;
 
-	public function __construct(IConfig $config, ChangeHandler $changeHandler) {
+	public function __construct(
+		IConfig $config,
+		RedisFactory $redisFactory,
+		ChangeHandler $changeHandler
+	) {
 		parent::__construct();
 		$this->config = $config;
+		$this->redisFactory = $redisFactory;
 		$this->changeHandler = $changeHandler;
 	}
 
@@ -59,37 +65,12 @@ class NotifyCommand extends Base {
 		parent::configure();
 	}
 
-	/**
-	 * @param $host
-	 * @param $port
-	 * @param $password
-	 * @return Redis
-	 * @throws Exception
-	 */
-	private function getRedis($host, $port, $password): Redis {
-		if ($host) {
-			if (!$port) {
-				$port = 6379;
-			}
-			$instance = new Redis();
-
-			$instance->connect($host, $port, 0.0);
-			if ($password) {
-				$instance->auth($password);
-			}
-			return $instance;
-		} else {
-			$redisFactory = OC::$server->getGetRedisFactory();
-			return $redisFactory->getInstance();
-		}
-	}
-
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
 		$prefix = $input->getOption('prefix') ?? $dataDirectory;
 		$format = $input->getOption('format');
 		try {
-			$redis = $this->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
+			$redis = $this->redisFactory->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
 		} catch (Exception $e) {
 			$output->writeln("<error>Failed to get redis connection</error>");
 			return 1;

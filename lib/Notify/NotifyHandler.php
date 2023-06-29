@@ -174,4 +174,8 @@ class NotifyHandler implements INotifyHandler {
 	public function stop() {
 		// noop
 	}
+
+	public function getCount(): int {
+		return (int)$this->redis->get($this->list . '_count');
+	}
 }

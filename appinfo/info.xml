@@ -28,5 +28,6 @@
 
 	<commands>
 		<command>OCA\FilesNotifyRedis\Command\NotifyCommand</command>
+		<command>OCA\FilesNotifyRedis\Command\Metrics</command>
 	</commands>
 </info>
