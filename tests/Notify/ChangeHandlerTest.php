@@ -31,8 +31,10 @@ use OCP\Files\Mount\IMountManager;
 use OCP\Files\Mount\IMountPoint;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Storage\IStorage;
+use OCP\IDBConnection;
 use OCP\IUser;
 use OCP\IUserManager;
+use Psr\Log\LoggerInterface;
 use Test\TestCase;
 
 /**
@@ -68,8 +70,17 @@ class ChangeHandlerTest extends TestCase {
 			->willReturn($mount);
 	}
 
+	private function getHandler(): ChangeHandler {
+		return new ChangeHandler(
+			$this->userManager,
+			$this->mountManager,
+			$this->createMock(IDBConnection::class),
+			$this->createMock(LoggerInterface::class)
+		);
+	}
+
 	public function testWriteChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new Change(IChange::MODIFIED, "user1/files/path");
 
 		$cache = $this->storage->getCache();
@@ -86,7 +97,7 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testWriteChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new Change(IChange::MODIFIED, "user1/files/path");
 
 		$cache = $this->storage->getCache();
@@ -102,7 +113,7 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testRenameChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
 
 		$cache = $this->storage->getCache();
@@ -120,7 +131,7 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testRenameChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
 
 		$cache = $this->storage->getCache();
@@ -137,7 +148,7 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testDeleteChangeNoMeta() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new Change(IChange::REMOVED, "user1/files/path");
 
 		$cache = $this->storage->getCache();
@@ -153,7 +164,7 @@ class ChangeHandlerTest extends TestCase {
 	}
 
 	public function testDeleteChangeDoesntExist() {
-		$handler = new ChangeHandler($this->userManager, $this->mountManager);
+		$handler = $this->getHandler();
 		$change = new Change(IChange::REMOVED, "user1/files/path");
 
 		$cache = $this->storage->getCache();
