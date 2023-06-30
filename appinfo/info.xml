@@ -6,7 +6,7 @@
 	<summary>Handle filesystem changes pushed to redis</summary>
 	<description><![CDATA[Adds support for handling filesystem notifications for local storages that are pushed into redis]]>
 	</description>
-	<version>0.3.0</version>
+	<version>0.3.1</version>
 	<licence>agpl</licence>
 	<author>Robin Appelman</author>
 	<namespace>FilesNotifyRedis</namespace>
