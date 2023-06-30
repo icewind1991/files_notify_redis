@@ -28,15 +28,26 @@ use OCP\Files\Mount\IMountManager;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Notify\IRenameChange;
 use OCP\Files\Storage\INotifyStorage;
+use OCP\IDBConnection;
 use OCP\IUserManager;
+use Psr\Log\LoggerInterface;
 
 class ChangeHandler {
 	private IUserManager $userManager;
 	private IMountManager $mountManager;
+	private IDBConnection $connection;
+	private LoggerInterface $logger;
 
-	public function __construct(IUserManager $userManager, IMountManager $mountManager) {
+	public function __construct(
+		IUserManager $userManager,
+		IMountManager $mountManager,
+		IDBConnection $connection,
+		LoggerInterface $logger
+	) {
 		$this->userManager = $userManager;
 		$this->mountManager = $mountManager;
+		$this->connection = $connection;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -73,6 +84,11 @@ class ChangeHandler {
 				$targetInternalPath = $mount->getInternalPath('/' . $change->getTargetPath());
 				$updater->renameFromStorage($mount->getStorage(), $internalPath, $targetInternalPath);
 				break;
+		}
+
+		if ($this->connection->inTransaction()) {
+			$this->logger->warning("unclosed database transaction after handling update, rolling back");
+			$this->connection->rollBack();
 		}
 	}
 }
