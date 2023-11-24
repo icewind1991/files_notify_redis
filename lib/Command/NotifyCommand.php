@@ -22,7 +22,6 @@
 namespace OCA\FilesNotifyRedis\Command;
 
 use Exception;
-use OC;
 use OC\Core\Command\Base;
 use OCA\FilesNotifyRedis\Change\RenameChange;
 use OCA\FilesNotifyRedis\Notify\ChangeHandler;
@@ -30,7 +29,6 @@ use OCA\FilesNotifyRedis\Notify\NotifyHandler;
 use OCP\Files\Notify\IChange;
 use OCP\Files\Storage\INotifyStorage;
 use OCP\IConfig;
-use Redis;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
