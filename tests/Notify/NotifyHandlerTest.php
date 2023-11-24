@@ -41,7 +41,7 @@ class NotifyHandlerTest extends TestCase {
 		$this->redis = $this->createMock(Redis::class);
 		$this->redis->method('rPop')
 			->willReturnCallback(function () {
-				return array_pop($this->list);
+				return array_pop($this->list) ?? false;
 			});
 	}
 
