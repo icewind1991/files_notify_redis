@@ -32,7 +32,7 @@ class Change extends \OC\Files\Notify\Change {
 	private ?DateTime $time;
 	private ?int $size;
 
-	public function __construct(int $type, string $path, DateTime $time = null, int $size = null) {
+	public function __construct(int $type, string $path, ?DateTime $time = null, ?int $size = null) {
 		parent::__construct($type, $path);
 
 		$this->time = $time;
