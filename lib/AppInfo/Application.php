@@ -21,7 +21,7 @@
 
 namespace OCA\FilesNotifyRedis\AppInfo;
 
-use \OCP\AppFramework\App;
+use OCP\AppFramework\App;
 
 class Application extends App {
 	public function __construct(array $urlParams = []) {

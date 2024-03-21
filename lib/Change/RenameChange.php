@@ -28,7 +28,7 @@ use DateTime;
 class RenameChange extends \OC\Files\Notify\RenameChange {
 	private ?DateTime $time;
 
-	public function __construct(int $type, string $path, string $targetPath, DateTime $time = null) {
+	public function __construct(int $type, string $path, string $targetPath, ?DateTime $time = null) {
 		parent::__construct($type, $path, $targetPath);
 
 		$this->time = $time;
