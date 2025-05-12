@@ -54,11 +54,11 @@ class Metrics extends Base {
 		try {
 			$redis = $this->redisFactory->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
 		} catch (Exception $e) {
-			$output->writeln("<error>Failed to get redis connection</error>");
+			$output->writeln('<error>Failed to get redis connection</error>');
 			return 1;
 		}
 
-		$notifyHandler = new NotifyHandler("", $redis, $input->getArgument('list'), "", function () {});
+		$notifyHandler = new NotifyHandler('', $redis, $input->getArgument('list'), '', function () {});
 		$count = $notifyHandler->getCount();
 		$output->writeln("Events processed: $count");
 		return 0;

@@ -42,7 +42,7 @@ class ChangeHandler {
 		IUserManager $userManager,
 		IMountManager $mountManager,
 		IDBConnection $connection,
-		LoggerInterface $logger
+		LoggerInterface $logger,
 	) {
 		$this->userManager = $userManager;
 		$this->mountManager = $mountManager;
@@ -87,7 +87,7 @@ class ChangeHandler {
 		}
 
 		if ($this->connection->inTransaction()) {
-			$this->logger->warning("unclosed database transaction after handling update, rolling back");
+			$this->logger->warning('unclosed database transaction after handling update, rolling back');
 			$this->connection->rollBack();
 		}
 	}

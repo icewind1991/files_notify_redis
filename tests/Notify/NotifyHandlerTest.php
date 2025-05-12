@@ -49,38 +49,38 @@ class NotifyHandlerTest extends TestCase {
 		$handler = new NotifyHandler('/base', $this->redis, '', '/$user/files/$path', function () {
 		});
 		$this->list[] = json_encode([
-			"event" => "modify",
-			"path" => "/base/foo/files/the/path",
+			'event' => 'modify',
+			'path' => '/base/foo/files/the/path',
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertEquals(IChange::MODIFIED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
 		$this->assertNull($changes[0]->getSize());
 		$this->assertNull($changes[0]->getTime());
 
 		$this->list[] = json_encode([
-			"event" => "delete",
-			"path" => "/base/foo/files/the/path",
+			'event' => 'delete',
+			'path' => '/base/foo/files/the/path',
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertEquals(IChange::REMOVED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
 		$this->assertNull($changes[0]->getSize());
 		$this->assertNull($changes[0]->getTime());
 
 		$this->list[] = json_encode([
-			"event" => "move",
-			"from" => "/base/foo/files/the/path",
-			"to" => "/base/foo/files/the/target",
+			'event' => 'move',
+			'from' => '/base/foo/files/the/path',
+			'to' => '/base/foo/files/the/target',
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertInstanceOf(IRenameChange::class, $changes[0]);
 		$this->assertEquals(IChange::RENAMED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
-		$this->assertEquals("foo/files/the/target", $changes[0]->getTargetPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/target', $changes[0]->getTargetPath());
 		$this->assertNull($changes[0]->getTime());
 	}
 
@@ -88,34 +88,34 @@ class NotifyHandlerTest extends TestCase {
 		$handler = new NotifyHandler('/base', $this->redis, '', '/$user/files/$path', function () {
 		});
 		$this->list[] = json_encode([
-			"event" => "modify",
-			"path" => "/base/foo/files/the/path",
-			"time" => "2019-05-13T10:58:35-0400",
-			"size" => 1024,
+			'event' => 'modify',
+			'path' => '/base/foo/files/the/path',
+			'time' => '2019-05-13T10:58:35-0400',
+			'size' => 1024,
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertEquals(IChange::MODIFIED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
 		$this->assertEquals(1024, $changes[0]->getSize());
-		$this->assertEquals(DateTime::createFromFormat(DateTime::ATOM, "2019-05-13T10:58:35-0400"), $changes[0]->getTime());
+		$this->assertEquals(DateTime::createFromFormat(DateTime::ATOM, '2019-05-13T10:58:35-0400'), $changes[0]->getTime());
 	}
 
 	public function testGetChangesMultiple() {
 		$handler = new NotifyHandler('/base', $this->redis, '', '/$user/files/$path', function () {
 		});
 		$this->list[] = json_encode([
-			"event" => "modify",
-			"path" => "/base/foo/files/the/path1",
+			'event' => 'modify',
+			'path' => '/base/foo/files/the/path1',
 		]);
 		$this->list[] = json_encode([
-			"event" => "modify",
-			"path" => "/base/foo/files/the/path2",
+			'event' => 'modify',
+			'path' => '/base/foo/files/the/path2',
 		]);
 		$changes = $handler->getChanges();
 		$this->assertCount(2, $changes);
-		$this->assertEquals("foo/files/the/path2", $changes[0]->getPath());
-		$this->assertEquals("foo/files/the/path1", $changes[1]->getPath());
+		$this->assertEquals('foo/files/the/path2', $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path1', $changes[1]->getPath());
 	}
 
 	public function pathFormatProvider() {
@@ -137,8 +137,8 @@ class NotifyHandlerTest extends TestCase {
 		$handler = new NotifyHandler($base, $this->redis, '', $format, function () {
 		});
 		$this->list[] = json_encode([
-			"event" => "modify",
-			"path" => $input,
+			'event' => 'modify',
+			'path' => $input,
 		]);
 		$changes = $handler->getChanges();
 		if ($expected) {
@@ -152,29 +152,29 @@ class NotifyHandlerTest extends TestCase {
 	public function testGetChangeLegacy() {
 		$handler = new NotifyHandler('/base', $this->redis, '', '/$user/files/$path', function () {
 		});
-		$this->list[] = "modify|/base/foo/files/the/path";
+		$this->list[] = 'modify|/base/foo/files/the/path';
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertEquals(IChange::MODIFIED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
 		$this->assertNull($changes[0]->getSize());
 		$this->assertNull($changes[0]->getTime());
 
-		$this->list[] = "delete|/base/foo/files/the/path";
+		$this->list[] = 'delete|/base/foo/files/the/path';
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertEquals(IChange::REMOVED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
 		$this->assertNull($changes[0]->getSize());
 		$this->assertNull($changes[0]->getTime());
 
-		$this->list[] = "move|/base/foo/files/the/path|/base/foo/files/the/target";
+		$this->list[] = 'move|/base/foo/files/the/path|/base/foo/files/the/target';
 		$changes = $handler->getChanges();
 		$this->assertCount(1, $changes);
 		$this->assertInstanceOf(IRenameChange::class, $changes[0]);
 		$this->assertEquals(IChange::RENAMED, $changes[0]->getType());
-		$this->assertEquals("foo/files/the/path", $changes[0]->getPath());
-		$this->assertEquals("foo/files/the/target", $changes[0]->getTargetPath());
+		$this->assertEquals('foo/files/the/path', $changes[0]->getPath());
+		$this->assertEquals('foo/files/the/target', $changes[0]->getTargetPath());
 		$this->assertNull($changes[0]->getTime());
 	}
 }
