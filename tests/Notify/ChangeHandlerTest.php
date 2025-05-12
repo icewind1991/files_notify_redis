@@ -64,7 +64,7 @@ class ChangeHandlerTest extends TestCase {
 			->willReturn($this->storage);
 		$mount->method('getInternalPath')
 			->willReturnCallback(function (string $path) {
-				return substr($path, strlen("/user1/"));
+				return substr($path, strlen('/user1/'));
 			});
 		$this->mountManager->method('find')
 			->willReturn($mount);
@@ -81,7 +81,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testWriteChangeNoMeta() {
 		$handler = $this->getHandler();
-		$change = new Change(IChange::MODIFIED, "user1/files/path");
+		$change = new Change(IChange::MODIFIED, 'user1/files/path');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');
@@ -98,7 +98,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testWriteChangeDoesntExist() {
 		$handler = $this->getHandler();
-		$change = new Change(IChange::MODIFIED, "user1/files/path");
+		$change = new Change(IChange::MODIFIED, 'user1/files/path');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');
@@ -114,7 +114,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testRenameChangeNoMeta() {
 		$handler = $this->getHandler();
-		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
+		$change = new RenameChange(IChange::RENAMED, 'user1/files/path', 'user1/files/target');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');
@@ -132,7 +132,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testRenameChangeDoesntExist() {
 		$handler = $this->getHandler();
-		$change = new RenameChange(IChange::RENAMED, "user1/files/path", "user1/files/target");
+		$change = new RenameChange(IChange::RENAMED, 'user1/files/path', 'user1/files/target');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');
@@ -149,7 +149,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testDeleteChangeNoMeta() {
 		$handler = $this->getHandler();
-		$change = new Change(IChange::REMOVED, "user1/files/path");
+		$change = new Change(IChange::REMOVED, 'user1/files/path');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');
@@ -165,7 +165,7 @@ class ChangeHandlerTest extends TestCase {
 
 	public function testDeleteChangeDoesntExist() {
 		$handler = $this->getHandler();
-		$change = new Change(IChange::REMOVED, "user1/files/path");
+		$change = new Change(IChange::REMOVED, 'user1/files/path');
 
 		$cache = $this->storage->getCache();
 		$this->storage->mkdir('');

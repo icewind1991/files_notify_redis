@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2018 Robin Appelman <robin@icewind.nl>
  *
@@ -42,7 +43,7 @@ class NotifyCommand extends Base {
 	public function __construct(
 		IConfig $config,
 		RedisFactory $redisFactory,
-		ChangeHandler $changeHandler
+		ChangeHandler $changeHandler,
 	) {
 		parent::__construct();
 		$this->config = $config;
@@ -70,7 +71,7 @@ class NotifyCommand extends Base {
 		try {
 			$redis = $this->redisFactory->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
 		} catch (Exception $e) {
-			$output->writeln("<error>Failed to get redis connection</error>");
+			$output->writeln('<error>Failed to get redis connection</error>');
 			return 1;
 		}
 		$verbose = $input->getOption('verbose');
@@ -91,7 +92,7 @@ class NotifyCommand extends Base {
 			try {
 				$this->changeHandler->applyChange($change);
 			} catch (Exception $e) {
-				$output->writeln("<error>" . $e->getMessage() . "</error>");
+				$output->writeln('<error>' . $e->getMessage() . '</error>');
 			}
 		});
 
