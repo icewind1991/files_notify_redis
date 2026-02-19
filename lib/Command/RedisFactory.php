@@ -32,12 +32,6 @@ class RedisFactory {
 		$this->factory = $factory;
 	}
 
-	/**
-	 * @param ?string $host
-	 * @param ?string $port
-	 * @param ?string $password
-	 * @return Redis
-	 */
 	public function getRedis(?string $host, ?string $port, ?string $password): Redis {
 		if ($host) {
 			if (!$port) {

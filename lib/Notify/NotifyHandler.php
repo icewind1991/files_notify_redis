@@ -57,6 +57,7 @@ class NotifyHandler implements INotifyHandler {
 	/**
 	 * @return Change[]
 	 */
+	#[\Override]
 	public function getChanges(): array {
 		$changes = [];
 		while ($change = $this->getChange()) {
@@ -143,6 +144,7 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
+	#[\Override]
 	public function listen(callable $callback) {
 		$active = true;
 
@@ -174,6 +176,7 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
+	#[\Override]
 	public function stop() {
 		// noop
 	}

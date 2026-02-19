@@ -51,6 +51,7 @@ class NotifyCommand extends Base {
 		$this->changeHandler = $changeHandler;
 	}
 
+	#[\Override]
 	protected function configure() {
 		$this
 			->setName('files_notify_redis:primary')
@@ -64,6 +65,7 @@ class NotifyCommand extends Base {
 		parent::configure();
 	}
 
+	#[\Override]
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		$dataDirectory = $this->config->getSystemValue('datadirectory');
 		$prefix = $input->getOption('prefix') ?? $dataDirectory;
