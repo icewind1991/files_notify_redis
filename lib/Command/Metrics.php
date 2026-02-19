@@ -58,7 +58,8 @@ class Metrics extends Base {
 			return 1;
 		}
 
-		$notifyHandler = new NotifyHandler('', $redis, $input->getArgument('list'), '', function () {});
+		$notifyHandler = new NotifyHandler('', $redis, $input->getArgument('list'), '', function () {
+		});
 		$count = $notifyHandler->getCount();
 		$output->writeln("Events processed: $count");
 		return 0;
