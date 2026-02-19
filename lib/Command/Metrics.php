@@ -38,6 +38,7 @@ class Metrics extends Base {
 		$this->redisFactory = $redisFactory;
 	}
 
+	#[\Override]
 	protected function configure() {
 		$this
 			->setName('files_notify_redis:metrics')
@@ -49,7 +50,7 @@ class Metrics extends Base {
 		parent::configure();
 	}
 
-
+	#[\Override]
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		try {
 			$redis = $this->redisFactory->getRedis($input->getOption('host'), $input->getOption('port'), $input->getOption('password'));
@@ -58,7 +59,8 @@ class Metrics extends Base {
 			return 1;
 		}
 
-		$notifyHandler = new NotifyHandler('', $redis, $input->getArgument('list'), '', function () {});
+		$notifyHandler = new NotifyHandler('', $redis, $input->getArgument('list'), '', function () {
+		});
 		$count = $notifyHandler->getCount();
 		$output->writeln("Events processed: $count");
 		return 0;
