@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace OCA\FilesNotifyRedis\Command;
 
 use Redis;
+use RedisCluster;
 
 class RedisFactory {
 	private \OC\RedisFactory $factory;
@@ -32,7 +33,7 @@ class RedisFactory {
 		$this->factory = $factory;
 	}
 
-	public function getRedis(?string $host, ?string $port, ?string $password): Redis {
+	public function getRedis(?string $host, ?string $port, ?string $password): Redis|RedisCluster {
 		if ($host) {
 			if (!$port) {
 				$port = 6379;
